@@ -1,0 +1,38 @@
+{
+  "name": "react-scroll-tracker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "files": [
+    "/dist"
+  ],
+  "keywords": [
+    "react",
+    "scroll",
+    "tracking",
+    "hooks"
+  ],
+  "scripts": {
+    "test": "test",
+    "build": "rimraf dist/ && tsc"
+  },
+  "author": "sam pennington",
+  "license": "ISC",
+  "peerDependencies": {
+    "react": "^16.12.0"
+  },
+  "np": {
+    "contents": "dist"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.9.0",
+    "@types/node": "^13.1.7",
+    "@types/react": "^16.9.17",
+    "jest": "^24.9.0",
+    "prettier": "^1.19.1",
+    "react": "^16.12.0",
+    "ts-jest": "^24.3.0",
+    "rimraf": "^3.0.0",
+    "typescript": "^3.7.4"
+  }
+}
