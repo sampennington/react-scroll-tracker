@@ -2,6 +2,11 @@ import { useState, useLayoutEffect } from 'react';
 
 const useScrollTracker = (
   trackScrollDepths?: number[],
+  callback?: (params: {
+    scrollY: number;
+    scrollPercent: number;
+    remainingDepths: Array<number>;
+  }) => void,
 ): { scrollY: number } => {
   const [state, setState] = useState({
     scrollDepths: trackScrollDepths,
@@ -36,6 +41,13 @@ const useScrollTracker = (
             endScrollTracker();
           }
 
+          if (callback) {
+            callback({
+              scrollY: nextMinDepth,
+              scrollPercent,
+              remainingDepths: updatedScrollDepths,
+            });
+          }
           setState({
             scrollY: nextMinDepth,
             scrollDepths: updatedScrollDepths,
