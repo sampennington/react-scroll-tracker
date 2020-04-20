@@ -1,6 +1,8 @@
 import { useState, useLayoutEffect } from 'react';
 
-const useScrollTracker = (trackScrollDepths?: number[]) => {
+const useScrollTracker = (
+  trackScrollDepths?: number[],
+): { scrollY: number } => {
   const [state, setState] = useState({
     scrollDepths: trackScrollDepths,
     scrollY: window.pageYOffset,
