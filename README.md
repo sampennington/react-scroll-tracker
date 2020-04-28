@@ -14,11 +14,9 @@ const SomeComponent = () => {
   const { scrollY } = useScrollTracker([25, 50, 75, 100]);
   return <SomeOtherComponent />;
 };
-
+```
 
 ## Usage with a callback parameter
-
-```
 
 There is an optional third parameter that accepts a function that will be called when each scroll depth is reached.
 It will be called with an object containing scrollDepth, scrollPercent, and remainingDepths:
@@ -46,6 +44,8 @@ const SomeComponent = () => {
   return <SomeOtherComponent />;
 };
 ```
+
+## Usage with no scroll depths
 
 useScrollTracker can also be used as is, with no parameters provided in order to update on every scroll depth change. However it's not recommended as will cause a render on every change, which could affect performance.
 
