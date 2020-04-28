@@ -25,7 +25,7 @@ It will be called with an object containing scrollDepth, scrollPercent, and rema
 {
   scrollDepth: 36, // This is dependent on the document size
   scrollY: 0.25, // 25 percent down the document
-  scrollDepths: [50, 75, 100] // 0.25 will now be removed from the remaining scroll depths
+  remainingDepths: [50, 75, 100] // 0.25 will now be removed from the remaining scroll depths
 }
 ```
 
