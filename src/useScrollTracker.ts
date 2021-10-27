@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect } from 'react';
+import { useState, useLayoutEffect, useEffect } from 'react';
 
 const useScrollTracker = (
   trackScrollDepths?: number[],
@@ -10,12 +10,26 @@ const useScrollTracker = (
 ): { scrollY: number } => {
   const [state, setState] = useState({
     scrollDepths: trackScrollDepths,
-    scrollY: window.pageYOffset,
+    scrollY: 0
   });
 
   const { scrollDepths, scrollY } = state;
 
+  useEffect(() => {
+    if (typeof window === 'undefined' || window.pageYOffset === 0) {
+      return;
+    }
+    setState(oldState => ({
+      ...oldState,
+      scrollY: window.pageYOffset
+    }));
+  }, []);
+
   useLayoutEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+
     const endScrollTracker = () =>
       window.removeEventListener('scroll', handleScroll);
 
