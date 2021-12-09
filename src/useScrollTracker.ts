@@ -1,4 +1,4 @@
-import { useState, useLayoutEffect, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 
 const useScrollTracker = (
   trackScrollDepths?: number[],
@@ -25,7 +25,7 @@ const useScrollTracker = (
     }));
   }, []);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (typeof window === 'undefined') {
       return;
     }
