@@ -23,20 +23,20 @@
   "author": "sam pennington",
   "license": "ISC",
   "peerDependencies": {
-    "react": "^16.12.0"
+    "react": ">=16.8.0"
   },
   "np": {
     "contents": "dist"
   },
   "devDependencies": {
-    "@types/jest": "^24.9.0",
-    "@types/node": "^13.1.7",
-    "@types/react": "^16.9.17",
-    "jest": "^24.9.0",
-    "prettier": "^1.19.1",
-    "react": "^16.12.0",
-    "ts-jest": "^24.3.0",
-    "rimraf": "^3.0.0",
-    "typescript": "^3.7.4"
+    "@types/jest": "^29.5.12",
+    "@types/node": "^20.11.19",
+    "@types/react": "^18.2.56",
+    "jest": "^29.7.0",
+    "prettier": "^3.2.5",
+    "react": "^18.2.0",
+    "ts-jest": "^29.1.2",
+    "rimraf": "^5.0.5",
+    "typescript": "^5.3.3"
   }
 }
