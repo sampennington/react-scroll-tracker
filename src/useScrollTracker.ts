@@ -1,12 +1,15 @@
 import { useState, useEffect } from 'react';
+import { getScrollPercent } from './utils';
+
+type Callback = (params: {
+  scrollY: number;
+  scrollPercent: number;
+  remainingDepths: Array<number>;
+}) => void
 
 const useScrollTracker = (
   trackScrollDepths?: number[],
-  callback?: (params: {
-    scrollY: number;
-    scrollPercent: number;
-    remainingDepths: Array<number>;
-  }) => void,
+  callback?: Callback,
 ): { scrollY: number } => {
   const [state, setState] = useState({
     scrollDepths: trackScrollDepths,
@@ -34,48 +37,46 @@ const useScrollTracker = (
       window.removeEventListener('scroll', handleScroll);
 
     const handleScroll = () => {
-      const h = document.documentElement;
-      const b = document.body;
+      const scrollPercent = getScrollPercent(document)
 
-      const scrollTop = h.scrollTop || b.scrollTop;
-      const scrollHeight = h.scrollHeight || b.scrollHeight;
-      const clientHeight = h.clientHeight;
+      if (!scrollDepths) {
+        return setState(oldState => ({ ...oldState, scrollY: scrollPercent }));
+      }
 
-      const scrollPercent = (scrollTop / (scrollHeight - clientHeight)) * 100;
+      const sortedScrollDepths = [...scrollDepths].sort((a, b) => a - b);
+      const reachedDepths = sortedScrollDepths.filter(depth => scrollPercent >= depth);
+      const remainingDepths = sortedScrollDepths.filter(depth => scrollPercent < depth);
 
-      if (scrollDepths) {
-        const nextMinDepth = Math.min(...scrollDepths, scrollHeight);
+      if (reachedDepths.length > 0) {
+        if (remainingDepths.length === 0) {
+          endScrollTracker();
+        }
 
-        if (scrollPercent >= nextMinDepth) {
-          const updatedScrollDepths = scrollDepths.filter(
-            depth => depth !== nextMinDepth,
-          );
+        if (callback) {
+          reachedDepths.forEach((depth, i) => {
+            // Remaining = unreached depths + reached depths not yet processed
+            const stillRemaining = [...reachedDepths.slice(i + 1), ...remainingDepths];
 
-          if (updatedScrollDepths.length === 0) {
-            endScrollTracker();
-          }
-
-          if (callback) {
             callback({
-              scrollY: nextMinDepth,
+              scrollY: depth,
               scrollPercent,
-              remainingDepths: updatedScrollDepths,
+              remainingDepths: stillRemaining,
             });
-          }
-          setState({
-            scrollY: nextMinDepth,
-            scrollDepths: updatedScrollDepths,
           });
         }
-      } else {
-        setState({ ...state, scrollY: scrollPercent });
+
+        setState({
+          scrollY: reachedDepths[reachedDepths.length - 1],
+          scrollDepths: remainingDepths,
+        });
+
       }
     };
 
     window.addEventListener('scroll', handleScroll);
 
     return endScrollTracker;
-  }, [scrollDepths, scrollY, state]);
+  }, [scrollDepths, callback]);
 
   return { scrollY };
 };
