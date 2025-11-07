@@ -1,6 +1,6 @@
 # react-scroll-tracker
 
-A React hook to help with scroll tracking events, which supports typescript.
+A React hook to help with scroll tracking events, which supports TypeScript and server-side rendering (SSR).
 
 ## Basic Usage
 
@@ -58,3 +58,78 @@ const SomeComponent = () => {
   return <App />;
 };
 ```
+
+## Server-Side Rendering (SSR) Support
+
+This hook is compatible with server-side rendering frameworks like Next.js. It safely handles environments where `window` is not available, but if you want it to work you'll need it in a client component.
+
+### Next.js App Router (v13+)
+
+When using the App Router, you'll need to mark components using this hook as Client Components with the `'use client'` directive:
+
+```tsx
+'use client';
+
+import { useScrollTracker } from 'react-scroll-tracker';
+
+export default function ArticlePage() {
+  useScrollTracker([25, 50, 75, 100], ({ scrollY }) => {
+    // Track scroll depth for analytics
+    console.log(`User scrolled to ${scrollY}%`);
+  });
+
+  return <article>{/* Your content */}</article>;
+}
+```
+
+Or create a separate client component:
+
+```tsx
+// components/ScrollTracker.tsx
+'use client';
+
+import { useScrollTracker } from 'react-scroll-tracker';
+
+export function ScrollTracker() {
+  useScrollTracker([25, 50, 75, 100], ({ scrollY }) => {
+    // Send to analytics
+    window.gtag?.('event', 'scroll', { depth: scrollY });
+  });
+
+  return null; // This component doesn't render anything
+}
+
+// app/page.tsx (Server Component)
+import { ScrollTracker } from '@/components/ScrollTracker';
+
+export default function Page() {
+  return (
+    <main>
+      <ScrollTracker />
+      {/* Your page content */}
+    </main>
+  );
+}
+```
+
+### Next.js Pages Router
+
+The Pages Router works seamlessly without the `'use client'` directive:
+
+```tsx
+// pages/blog/[slug].tsx
+import { useScrollTracker } from 'react-scroll-tracker';
+
+export default function BlogPost() {
+  const { scrollY } = useScrollTracker([25, 50, 75, 100]);
+
+  return (
+    <article>
+      <div>Reading progress: {scrollY}%</div>
+      {/* Your blog content */}
+    </article>
+  );
+}
+```
+
+The hook will initialize with `scrollY: 0` on the server and start tracking once the component hydrates on the client.
