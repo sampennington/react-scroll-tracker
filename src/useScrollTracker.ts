@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { getScrollPercent } from './utils';
 
 type Callback = (params: {
@@ -10,6 +10,7 @@ type Callback = (params: {
 const useScrollTracker = (
   trackScrollDepths?: number[],
   callback?: Callback,
+  throttleMs: number = 100,
 ): { scrollY: number } => {
   const [state, setState] = useState({
     scrollDepths: trackScrollDepths,
@@ -17,6 +18,12 @@ const useScrollTracker = (
   });
 
   const { scrollDepths, scrollY } = state;
+  const lastUpdateTimeRef = useRef<number>(0);
+  const callbackRef = useRef<Callback | undefined>(callback);
+
+  useEffect(() => {
+    callbackRef.current = callback;
+  }, [callback]);
 
   useEffect(() => {
     if (typeof window === 'undefined' || window.pageYOffset === 0) {
@@ -24,7 +31,7 @@ const useScrollTracker = (
     }
     setState(oldState => ({
       ...oldState,
-      scrollY: window.pageYOffset
+      scrollY: getScrollPercent(document)
     }));
   }, []);
 
@@ -40,7 +47,12 @@ const useScrollTracker = (
       const scrollPercent = getScrollPercent(document)
 
       if (!scrollDepths) {
-        return setState(oldState => ({ ...oldState, scrollY: scrollPercent }));
+        const now = Date.now();
+        if (now - lastUpdateTimeRef.current >= throttleMs) {
+          lastUpdateTimeRef.current = now;
+          return setState(oldState => ({ ...oldState, scrollY: scrollPercent }));
+        }
+        return;
       }
 
       const sortedScrollDepths = [...scrollDepths].sort((a, b) => a - b);
@@ -52,12 +64,12 @@ const useScrollTracker = (
           endScrollTracker();
         }
 
-        if (callback) {
+        if (callbackRef.current) {
           reachedDepths.forEach((depth, i) => {
             // Remaining = unreached depths + reached depths not yet processed
             const stillRemaining = [...reachedDepths.slice(i + 1), ...remainingDepths];
 
-            callback({
+            callbackRef.current!({
               scrollY: depth,
               scrollPercent,
               remainingDepths: stillRemaining,
@@ -76,7 +88,7 @@ const useScrollTracker = (
     window.addEventListener('scroll', handleScroll);
 
     return endScrollTracker;
-  }, [scrollDepths, callback]);
+  }, [scrollDepths, throttleMs]);
 
   return { scrollY };
 };

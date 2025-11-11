@@ -2,6 +2,22 @@
 
 A React hook to help with scroll tracking events, which supports TypeScript and server-side rendering (SSR).
 
+## API
+
+```tsx
+useScrollTracker(trackScrollDepths?, callback?, throttleMs?)
+```
+
+### Parameters
+
+- `trackScrollDepths` (optional): Array of scroll depth percentages (0-100) to track. When a depth is reached, it fires once and is then removed.
+- `callback` (optional): Function called when each scroll depth is reached. Receives `{ scrollY, scrollPercent, remainingDepths }`.
+- `throttleMs` (optional): Throttle interval in milliseconds for updates when no scroll depths are provided. Default: 100ms.
+
+### Returns
+
+- `{ scrollY }`: Current scroll position (either the last reached depth percentage, or current scroll percentage if no depths provided)
+
 ## Basic Usage
 
 useScrollTracker takes an input value to specify which scroll depths to track. So in this example, the possible values of scrollY are 25, 50, 75 and 100. Each of which will fire when that percentage down the page is reached, it will then be removed so will not fire again.
@@ -47,7 +63,7 @@ const SomeComponent = () => {
 
 ## Usage with no scroll depths
 
-useScrollTracker can also be used as is, with no parameters provided in order to update on every scroll depth change. However it's not recommended as will cause a render on every change, which could affect performance.
+useScrollTracker can also be used with no parameters to track continuous scroll position. To prevent performance issues from excessive re-renders, updates are automatically throttled to occur at most once every 100ms by default.
 
 ```tsx
 import React from 'react';
@@ -56,6 +72,16 @@ import { useScrollTracker } from 'react-scroll-tracker';
 const SomeComponent = () => {
   const { scrollY } = useScrollTracker();
   return <App />;
+};
+```
+
+You can customize the throttle interval using the third parameter:
+
+```tsx
+const SomeComponent = () => {
+  // Update at most once every 200ms
+  const { scrollY } = useScrollTracker(undefined, undefined, 200);
+  return <App scrollPercent={scrollY} />;
 };
 ```
 

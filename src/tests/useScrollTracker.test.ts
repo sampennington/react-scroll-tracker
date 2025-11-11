@@ -58,7 +58,7 @@ describe('useScrollTracker', () => {
   });
 
   it('should work without scroll depths (track all changes)', () => {
-    const { result } = renderHook(() => useScrollTracker());
+    const { result } = renderHook(() => useScrollTracker(undefined, undefined, 0));
 
     setScrollPosition(30);
 
@@ -67,6 +67,27 @@ describe('useScrollTracker', () => {
     setScrollPosition(60);
 
     expect(result.current.scrollY).toBe(60);
+  });
+
+  it('should throttle updates when no scroll depths provided', () => {
+    jest.useFakeTimers();
+    const { result } = renderHook(() => useScrollTracker(undefined, undefined, 100));
+
+    setScrollPosition(30);
+    expect(result.current.scrollY).toBe(30);
+
+    // Immediate second update should be throttled
+    setScrollPosition(40);
+    expect(result.current.scrollY).toBe(30); // Still 30, throttled
+
+    // Advance time by 100ms
+    jest.advanceTimersByTime(100);
+
+    // Now update should work
+    setScrollPosition(60);
+    expect(result.current.scrollY).toBe(60);
+
+    jest.useRealTimers();
   });
 
   it('should fire all reached depths when scrolling past multiple milestones', () => {
@@ -117,5 +138,33 @@ describe('useScrollTracker', () => {
       scrollPercent: 50,
       remainingDepths: [75],
     });
+  });
+
+  it('should handle non-memoized callbacks without re-registering listeners', () => {
+    const callLog: number[] = [];
+
+    const { rerender } = renderHook(
+      ({ depths }) => {
+        // Create a new callback on every render (non-memoized)
+        const callback = ({ scrollY }: { scrollY: number }) => {
+          callLog.push(scrollY);
+        };
+        return useScrollTracker(depths, callback);
+      },
+      { initialProps: { depths: [25, 50, 75] } }
+    );
+
+    setScrollPosition(25);
+    expect(callLog).toEqual([25]);
+
+    // Force re-render with same depths (callback will be recreated)
+    rerender({ depths: [25, 50, 75] });
+
+    // Scroll to 50% - callback should still work with the latest callback instance
+    setScrollPosition(50);
+    expect(callLog).toEqual([25, 50]);
+
+    // The key point: callback was called correctly both times,
+    // proving that non-memoized callbacks work without issues
   });
 });
