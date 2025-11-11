@@ -29,6 +29,7 @@ const useScrollTracker = (
     if (typeof window === 'undefined' || window.pageYOffset === 0) {
       return;
     }
+
     setState(oldState => ({
       ...oldState,
       scrollY: getScrollPercent(document)
@@ -48,10 +49,13 @@ const useScrollTracker = (
 
       if (!scrollDepths) {
         const now = Date.now();
-        if (now - lastUpdateTimeRef.current >= throttleMs) {
+        const isOverThrottle = now - lastUpdateTimeRef.current >= throttleMs
+
+        if (isOverThrottle) {
           lastUpdateTimeRef.current = now;
           return setState(oldState => ({ ...oldState, scrollY: scrollPercent }));
         }
+
         return;
       }
 
